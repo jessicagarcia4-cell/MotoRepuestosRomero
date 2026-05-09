@@ -1,0 +1,69 @@
+const clientId = `CLI-${Date.now()}`;
+const newClient = {
+  id: clientId,
+  name: formData.name || 'Cliente Anónimo',
+  email: formData.email || '',
+  phone: formData.phone || '',
+  registered: new Date().toLocaleDateString('es-ES'),
+  address: deliveryMethod === 'delivery' ? {
+    depto: formData.depto,
+    muni: formData.muni,
+    colonia: formData.colonia,
+    ref: formData.ref
+  } : null
+};
+
+if (setClients) {
+  setClients(prev => {
+    const exists = prev.some(c => c.phone && c.phone.replace(/\D/g, '') === (newClient.phone || '').replace(/\D/g, ''));
+    if (exists) return prev;
+    return [newClient, ...prev];
+  });
+}
+
+const orderId = `ORD-${Date.now()}`;
+const order = {
+  id: orderId,
+  date: new Date().toLocaleDateString('es-ES'),
+  client: newClient.name,
+  phone: newClient.phone,
+  total,
+  status: 'Pendiente',
+  deliveryMethod: deliveryMethod === 'delivery' ? 'delivery' : 'pickup',
+  address: newClient.address,
+  items: cart.map(i => ({ id: i.id, name: i.name, qty: i.quantity, price: i.price }))
+};
+
+if (setOrders) {
+  setOrders(prev => [order, ...prev]);
+}
+
+let msg = `*NUEVO PEDIDO - MRR* 🏍️\n`;
+msg += `------------------------\n`;
+if (deliveryMethod === 'delivery') {
+  msg += `*Cliente:* ${formData.name}\n`;
+  msg += `*Teléfono:* ${formData.phone}\n`;
+  msg += `*Método:* Envío a domicilio 🚚\n`;
+  msg += `*Dirección:* ${formData.depto}, ${formData.muni}, ${formData.colonia}. Ref: ${formData.ref}\n`;
+} else {
+  msg += `*Cliente:* ${formData.name || 'No especificado'}\n`;
+  msg += `*Teléfono:* ${formData.phone || 'No especificado'}\n`;
+  msg += `*Método:* Retiro en Tienda 🏪\n`;
+}
+msg += `------------------------\n`;
+msg += `*PRODUCTOS:*\n`;
+cart.forEach(item => {
+  msg += `- ${item.quantity}x ${item.name} ($${item.price})\n`;
+});
+msg += `------------------------\n`;
+msg += `*Subtotal:* $${subtotal}\n`;
+msg += `*Envío:* ${shippingCost === 'Acordar' ? 'Se acordará por WhatsApp' : '$' + shippingCost}\n`;
+msg += `*TOTAL APROX:* $${total} ${shippingCost === 'Acordar' ? '+ Envío' : ''}\n`;
+
+const encodedMsg = encodeURIComponent(msg);
+window.open(`https://wa.me/50369954221?text=${encodedMsg}`, '_blank');
+
+setCart([]);
+setDeliveryMethod('');
+setFormData({ name: '', phone: '', depto: '', muni: '', ref: '', colonia: '' });
+setIsOpen(false);

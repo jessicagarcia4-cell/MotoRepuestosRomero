@@ -1,0 +1,10 @@
+<button onClick={() => handleAddToCart(selectedProduct, 1)} className="flex-1 bg-slate-900 hover:bg-red-600 text-white h-12 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors shadow-lg hover:shadow-red-500/30 uppercase tracking-wide">
+              <ShoppingCart size={20} /> Añadir al carrito
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <Footer />
+</div>
